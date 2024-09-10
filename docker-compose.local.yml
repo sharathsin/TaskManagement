@@ -4,7 +4,7 @@ services:
   user_service:
     build:
       context: ./UserService
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     environment:
@@ -18,11 +18,14 @@ services:
       - ./UserService:/usr/src/app
     depends_on:
       - db_user
+      - redis
+    networks:
+      - app-network
 
   task_service:
     build:
       context: ./TaskService
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     ports:
       - "8001:8001"
     environment:
@@ -36,11 +39,14 @@ services:
       - ./TaskService:/usr/src/app
     depends_on:
       - db_task
+      - redis
+    networks:
+      - app-network
 
   notification_service:
     build:
       context: ./NotificationService
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     ports:
       - "8002:8002"
     environment:
@@ -54,6 +60,9 @@ services:
       - ./NotificationService:/usr/src/app
     depends_on:
       - db_notification
+      - redis
+    networks:
+      - app-network
 
   db_user:
     image: postgres:12
@@ -63,6 +72,8 @@ services:
       POSTGRES_PASSWORD: password
     ports:
       - "5432:5432"
+    networks:
+      - app-network
 
   db_task:
     image: postgres:12
@@ -72,6 +83,8 @@ services:
       POSTGRES_PASSWORD: password
     ports:
       - "5433:5433"
+    networks:
+      - app-network
 
   db_notification:
     image: postgres:12
@@ -81,3 +94,55 @@ services:
       POSTGRES_PASSWORD: password
     ports:
       - "5434:5434"
+    networks:
+      - app-network
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    depends_on:
+      - user_service
+      - task_service
+      - notification_service
+    networks:
+      - app-network
+
+  loki:
+    image: grafana/loki:2.7.1
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki/loki-config.yml:/etc/loki/local-config.yaml
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - app-network
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+      - loki
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

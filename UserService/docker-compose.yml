@@ -1,0 +1,36 @@
+
+version: '3'
+
+services:
+  user_service:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8001
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - "8001:8001"
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - POSTGRES_DB=user_db
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+
+  postgres:
+    image: "postgres:13"
+    environment:
+      POSTGRES_DB: user_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"

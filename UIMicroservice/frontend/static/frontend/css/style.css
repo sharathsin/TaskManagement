@@ -1,0 +1,88 @@
+
+/* static/frontend/css/style.css */
+
+/* General body styling */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f9fa; /* Light gray background */
+    color: #333; /* Darker text for contrast */
+}
+
+/* Centering content */
+.container {
+    margin-top: 50px;
+    max-width: 800px;
+    padding: 20px;
+}
+
+/* Button customizations */
+.btn-primary, .btn-secondary {
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #004085;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+/* Form styling */
+form {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Text alignment and sizing */
+.text-center {
+    text-align: center;
+}
+
+h1, h2 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* List group custom styling */
+.list-group-item {
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.list-group-item a {
+    font-size: 1.2rem;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.list-group-item a:hover {
+    text-decoration: underline;
+}
+
+/* Task detail page */
+.task-detail p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+/* Custom spacing for task forms */
+.form-group {
+    margin-bottom: 20px;
+}

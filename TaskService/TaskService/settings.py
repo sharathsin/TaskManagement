@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +21,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-c+pxqe=5o&f%op=a)i%64q@ap)82t9q$2!1d1laf50xz!fc@t-"
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-c+pxqe=5o&f%op=a)i%64q@ap)82t9q$2!1d1laf50xz!fc@t-')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DJANGO_DEBUG', True)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -74,9 +75,13 @@ WSGI_APPLICATION = "TaskService.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),  # Default: PostgreSQL
+        'NAME': os.getenv('DB_NAME', 'task_db'),  # Default: task_db
+        'USER': os.getenv('DB_USER', 'user'),  # Default: user
+        'PASSWORD': os.getenv('DB_PASSWORD', 'password'),  # Default: password
+        'HOST': os.getenv('DB_HOST', 'localhost'),  # Default: localhost
+        'PORT': os.getenv('DB_PORT', '5433'),  # Default: 5433
     }
 }
 

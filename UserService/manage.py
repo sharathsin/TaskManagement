@@ -3,6 +3,8 @@
 import os
 import sys
 
+from metric_server import start_metrics_server
+
 
 def main():
     """Run administrative tasks."""

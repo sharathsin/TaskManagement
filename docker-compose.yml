@@ -1,12 +1,13 @@
 version: '3'
 
 services:
-  user_service:
+  userservice:
     build:
       context: ./UserService
       dockerfile: Dockerfile
     ports:
       - "8001:8001"
+      - "8006:8006"
     environment:
       - DB_ENGINE=django.db.backends.postgresql
       - DB_NAME=user_db
@@ -14,6 +15,7 @@ services:
       - DB_PASSWORD=password
       - DB_HOST=db_user
       - DB_PORT=5432
+      - REDIS_HOST=redis
     volumes:
       - ./UserService:/usr/src/app
       - ./logs/user_service:/var/log/user_service
@@ -126,7 +128,7 @@ services:
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
     depends_on:
-      - user_service
+      - userservice
       - task_service
       - notification_service
     networks:
@@ -142,8 +144,10 @@ services:
 
   promtail:
     image: grafana/promtail:2.9.0
+    ports:
+      - "9080:9080"
     volumes:
-      - /var/log:/var/log
+      - ./logs/user_service:/var/log/user_service
       - ./promtail/config.yml:/etc/promtail/config.yml
       - /var/run/docker.sock:/var/run/docker.sock
       - ./promtail_positions:/etc/promtail/positions
@@ -173,11 +177,11 @@ services:
       ports:
         - "8000:8000"
       environment:
-        - USER_SERVICE_URL=http://user_service:8001
+        - USER_SERVICE_URL=http://userservice:8001
         - TASK_SERVICE_URL=http://task_service:8002
         - NOTIFICATION_SERVICE_URL=http://notification_service:8003
       depends_on:
-        - user_service
+        - userservice
         - task_service
         - notification_service
       networks:

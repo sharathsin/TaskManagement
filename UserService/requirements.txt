@@ -1,4 +1,4 @@
-
+prometheus_client
 Django>=3.2
 django-redis
 djangorestframework

@@ -20,7 +20,7 @@ scrape_configs:
       - docker: {}
   - job_name: user_service_logs
     static_configs:
-      - targets: ['localhost']
+      - targets: ['user_service']
         labels:
           job: user_service
           __path__: /var/log/user_service/*.log

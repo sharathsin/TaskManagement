@@ -18,8 +18,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the current directory contents into the container at /usr/src/app
 COPY . .
 
-# Expose port 8000 for Django
+# Expose port 8001 for Django
 EXPOSE 8001
+EXPOSE 8005
+EXPOSE 8006
 
 # Run the Django development server
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8001"]

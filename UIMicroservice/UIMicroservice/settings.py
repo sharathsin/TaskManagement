@@ -57,11 +57,11 @@ TEMPLATES = [
 WSGI_APPLICATION = 'UIMicroservice.wsgi.application'
 
 # Minimal database configuration for Django to run
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.dummy',  # Using a dummy database backend
-    }
-}
+# settings.py
+
+
+
+
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / "frontend/static"]

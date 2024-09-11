@@ -6,7 +6,7 @@ services:
       context: ./UserService
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - "8001:8001"
     environment:
       - DB_ENGINE=django.db.backends.postgresql
       - DB_NAME=user_db
@@ -16,6 +16,7 @@ services:
       - DB_PORT=5432
     volumes:
       - ./UserService:/usr/src/app
+      - ./logs/user_service:/var/log/user_service
     depends_on:
       - db_user
       - redis
@@ -27,7 +28,7 @@ services:
       context: ./TaskService
       dockerfile: Dockerfile
     ports:
-      - "8001:8001"
+      - "8002:8002"
     environment:
       - DB_ENGINE=django.db.backends.postgresql
       - DB_NAME=task_db
@@ -46,9 +47,9 @@ services:
   notification_service:
     build:
       context: ./NotificationService
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile  # Ensure this path points to the correct Dockerfile
     ports:
-      - "8002:8002"
+      - "8003:8003"
     environment:
       - DB_ENGINE=django.db.backends.postgresql
       - DB_NAME=notification_db
@@ -67,17 +68,25 @@ services:
   db_user:
     image: postgres:12
     environment:
+      DB_DB: user_db
+      DB_USER: user
+      DB_PASSWORD: password
       POSTGRES_DB: user_db
       POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: password  #
     ports:
       - "5432:5432"
+    volumes:
+      - db_user_data:/var/lib/postgresql/data
     networks:
       - app-network
 
   db_task:
     image: postgres:12
     environment:
+      DB_DB: task_db
+      DB_USER: user
+      DB_PASSWORD: password
       POSTGRES_DB: task_db
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
@@ -89,6 +98,9 @@ services:
   db_notification:
     image: postgres:12
     environment:
+      DB_DB: notification_db
+      DB_USER: user
+      DB_PASSWORD: password
       POSTGRES_DB: notification_db
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
@@ -96,6 +108,7 @@ services:
       - "5434:5434"
     networks:
       - app-network
+
 
   redis:
     image: redis:alpine
@@ -120,14 +133,25 @@ services:
       - app-network
 
   loki:
-    image: grafana/loki:2.7.1
+    image: grafana/loki:2.9.10
     ports:
       - "3100:3100"
-    volumes:
-      - ./loki/loki-config.yml:/etc/loki/local-config.yaml
     command: -config.file=/etc/loki/local-config.yaml
     networks:
       - app-network
+
+  promtail:
+    image: grafana/promtail:2.9.0
+    volumes:
+      - /var/log:/var/log
+      - ./promtail/config.yml:/etc/promtail/config.yml
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./promtail_positions:/etc/promtail/positions
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - app-network
+
+
 
   grafana:
     image: grafana/grafana
@@ -142,7 +166,26 @@ services:
       - loki
     networks:
       - app-network
-
+  ui_service:
+      build:
+        context: ./UIMicroservice
+        dockerfile: Dockerfile
+      ports:
+        - "8000:8000"
+      environment:
+        - USER_SERVICE_URL=http://user_service:8001
+        - TASK_SERVICE_URL=http://task_service:8002
+        - NOTIFICATION_SERVICE_URL=http://notification_service:8003
+      depends_on:
+        - user_service
+        - task_service
+        - notification_service
+      networks:
+        - app-network
 networks:
   app-network:
     driver: bridge
+volumes:
+  db_user_data:
+  db_task_data:
+  loki_data:
